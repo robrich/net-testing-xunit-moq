@@ -1,4 +1,4 @@
-namespace LightSensorApp.Tests;
+namespace LightController.Tests;
 
 public class GettingStarted
 {
