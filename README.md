@@ -14,7 +14,7 @@ About this code
 
 At the beginning of the talk we start with the `start` folder.
 
-At the end of the talk we'll finish with the `end` folder.
+At the end of the talk we'll finish with the `done` folder.
 
 Running the tests
 -----------------
