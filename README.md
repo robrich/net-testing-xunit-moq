@@ -6,8 +6,16 @@
 This is the code that supports the live demo of writing unit tests in C# and .NET using [xUnit](https://xunit.net/docs/getting-started/netcore/cmdline).
 
 Along the way, we'll pull in these dependencies:
-- [MoQ](https://github.com/Moq/moq4) for mocking,
-- [AutoMocker](https://github.com/moq/Moq.AutoMocker) as a testing IoC container
+- [Shouldly](https://docs.shouldly.org/) for assertions
+- [NSubstitute](https://nsubstitute.github.io/help/getting-started/) for mocking
+- [AutoFixture](https://blog.ploeh.dk/2010/08/19/AutoFixtureasanauto-mockingcontainer/) as a testing IoC container
+
+
+See also
+
+- [Fluent Assertions -> Shouldly Migration Guide](https://github.com/shouldly/shouldly/issues/1034)
+- [AutoFixture can't instantiate Controllers](https://github.com/AutoFixture/AutoFixture/issues/1141): `var controller = fixture.Build<SomeController>().OmitAutoProperties().Create();`
+
 
 About this code
 ---------------

@@ -11,16 +11,16 @@ public class LightActuator_ActuateLights
         DateTime startTime = new DateTime(2000, 1, 1); // random value
 
         // Mocks
-        var ioc = new AutoMocker();
+        var ioc = new Fixture().Customize(new AutoNSubstituteCustomization());
 
         // Act
-        LightActuator actuator = ioc.CreateInstance<LightActuator>();
+        LightActuator actuator = ioc.Create<LightActuator>();
         actuator.LastMotionTime = startTime;
         actuator.ActuateLights(motionDetected);
         DateTime actual = actuator.LastMotionTime;
 
         // Assert
-        actual.Should().NotBe(startTime);
+        actual.ShouldNotBe(startTime);
     }
 
     [Fact]
@@ -31,16 +31,16 @@ public class LightActuator_ActuateLights
         DateTime startTime = new DateTime(2000, 1, 1); // random value
 
         // Mocks
-        var ioc = new AutoMocker();
+        var ioc = new Fixture().Customize(new AutoNSubstituteCustomization());
 
         // Act
-        LightActuator actuator = ioc.CreateInstance<LightActuator>();
+        LightActuator actuator = ioc.Create<LightActuator>();
         actuator.LastMotionTime = startTime;
         actuator.ActuateLights(motionDetected);
         DateTime actual = actuator.LastMotionTime;
 
         // Assert
-        actual.Should().Be(startTime);
+        actual.ShouldBe(startTime);
     }
 
     [Theory]
@@ -55,16 +55,16 @@ public class LightActuator_ActuateLights
         bool actualTurnedOn = false;
 
         // Mocks
-        AutoMocker ioc = new AutoMocker();
+        var ioc = new Fixture().Customize(new AutoNSubstituteCustomization());
         SetupTimePeriodHelper(ioc, timePeriod);
-        SetupLightSwitcher_TurnOn(ioc, () => actualTurnedOn = true);
+        SetupLightSwitcher_TurnOn(ioc, a => actualTurnedOn = true);
 
         // Act
-        LightActuator actuator = ioc.CreateInstance<LightActuator>();
+        LightActuator actuator = ioc.Create<LightActuator>();
         actuator.ActuateLights(motionDetected);
 
         // Assert
-        actualTurnedOn.Should().Be(expectedTurnedOn);
+        actualTurnedOn.ShouldBe(expectedTurnedOn);
         //ioc.GetMock<ILightSwitcher>().Verify(m => m.TurnOn(), Times.Once());
         
     }
@@ -78,16 +78,16 @@ public class LightActuator_ActuateLights
         bool expected = false;
 
         // Mocks
-        AutoMocker ioc = new AutoMocker();
+        var ioc = new Fixture().Customize(new AutoNSubstituteCustomization());
         SetupTimePeriodHelper(ioc, TimePeriod.Night);
-        SetupLightSwitcher_TurnOn(ioc, () => turnedOn = true);
+        SetupLightSwitcher_TurnOn(ioc, a => turnedOn = true);
 
         // Act
-        LightActuator actuator = ioc.Get<LightActuator>();
+        LightActuator actuator = ioc.Create<LightActuator>();
         actuator.ActuateLights(motionDetected);
 
         // Assert
-        turnedOn.Should().Be(expected);
+        turnedOn.ShouldBe(expected);
         //ioc.GetMock<ILightSwitcher>().Verify(m => m.TurnOn(), Times.Never());
 
     }
@@ -106,18 +106,18 @@ public class LightActuator_ActuateLights
         // Mocks
         DateTime startTime = new DateTime(2000, 1, 1, 20, 0, 0);
         DateTime currentTime = startTime.AddSeconds(seconds);
-        AutoMocker ioc = new AutoMocker();
+        var ioc = new Fixture().Customize(new AutoNSubstituteCustomization());
         SetupTimePeriodHelper(ioc, TimePeriod.Evening);
-        SetupLightSwitcher_TurnOff(ioc, () => turnedOff = true);
+        SetupLightSwitcher_TurnOff(ioc, a => turnedOff = true);
         SetupCurrentTimeHelper(ioc, currentTime);
 
         // Act
-        LightActuator actuator = ioc.Get<LightActuator>();
+        LightActuator actuator = ioc.Create<LightActuator>();
         actuator.LastMotionTime = startTime;
         actuator.ActuateLights(motionDetected: false);
 
         // Assert
-        turnedOff.Should().Be(expected);
+        turnedOff.ShouldBe(expected);
     }
 
     [Theory]
@@ -131,62 +131,52 @@ public class LightActuator_ActuateLights
         bool turnedOff = false;
 
         // Mocks
-        AutoMocker ioc = new AutoMocker();
+        var ioc = new Fixture().Customize(new AutoNSubstituteCustomization());
         SetupTimePeriodHelper(ioc, timeOfDay);
-        SetupLightSwitcher_TurnOff(ioc, () => turnedOff = true);
+        SetupLightSwitcher_TurnOff(ioc, a => turnedOff = true);
         
         // Act
-        LightActuator actuator = ioc.Get<LightActuator>();
+        LightActuator actuator = ioc.Create<LightActuator>();
         actuator.ActuateLights(motionDetected: false);
 
         // Assert
-        turnedOff.Should().Be(expected);
+        turnedOff.ShouldBe(expected);
     }
 
-    private void SetupTimePeriodHelper(AutoMocker ioc, TimePeriod timeOfDay)
+    private void SetupTimePeriodHelper(IFixture ioc, TimePeriod timeOfDay)
     {
-        var timePeriodHelper = new Mock<ITimePeriodHelper>();
-        timePeriodHelper
-            .Setup(m => m.GetTimePeriod(It.IsAny<DateTime>()))
+        ITimePeriodHelper timePeriodHelper = Substitute.For<ITimePeriodHelper>();
+        timePeriodHelper.GetTimePeriod(Arg.Any<DateTime>())
             .Returns(timeOfDay);
-        ioc.Use(timePeriodHelper);
+        ioc.Register<ITimePeriodHelper>(() => timePeriodHelper);
 
         /* or
-        var timePeriodHelper = mocker.GetMock<ITimePeriodHelper>();
-        timePeriodHelper.Setup(m => m.GetTimePeriod(It.IsAny<DateTime>())).Returns(timePeriod);
+        var timePeriodHelper = ioc.Freeze<ITimePeriodHelper>();
+        timePeriodHelper.GetTimePeriod(Arg.Any<DateTime>()).Returns(timePeriod);
         */
     }
 
-    private void SetupLightSwitcher_TurnOn(AutoMocker ioc, Action turnedOnCallback)
+    private void SetupLightSwitcher_TurnOn(IFixture ioc, Action<CallInfo> turnedOnCallback)
     {
-        var lightSwitcher = new Mock<ILightSwitcher>();
+        var lightSwitcher = ioc.Freeze<ILightSwitcher>();
         lightSwitcher
-            .Setup(m => m.TurnOn())
-            .Callback(turnedOnCallback);
-        ioc.Use(lightSwitcher);
-
-        /* or
-        var lightSwitcher = mocker.GetMock<ILightSwitcher>();
-        lightSwitcher.Setup(m => m.TurnOn()).Callback(callback);
-        */
+            .When(m => m.TurnOn())
+            .Do(turnedOnCallback);
     }
 
-    private void SetupLightSwitcher_TurnOff(AutoMocker ioc, Action turnedOffCallback)
+    private void SetupLightSwitcher_TurnOff(IFixture ioc, Action<CallInfo> turnedOffCallback)
     {
-        var lightSwitcher = new Mock<ILightSwitcher>();
+        var lightSwitcher = ioc.Freeze<ILightSwitcher>();
         lightSwitcher
-            .Setup(m => m.TurnOff())
-            .Callback(turnedOffCallback);
-        ioc.Use(lightSwitcher);
+            .When(m => m.TurnOff())
+            .Do(turnedOffCallback);
     }
 
-    private void SetupCurrentTimeHelper(AutoMocker ioc, DateTime currentTime)
+    private void SetupCurrentTimeHelper(IFixture ioc, DateTime currentTime)
     {
-        var currentTimeHelper = new Mock<ICurrentTimeHelper>();
-        currentTimeHelper
-            .Setup(m => m.GetNow())
+        var currentTimeHelper = ioc.Freeze<ICurrentTimeHelper>();
+        currentTimeHelper.GetNow()
             .Returns(currentTime);
-        ioc.Use(currentTimeHelper);
     }
 
 }

@@ -5,7 +5,7 @@ public class GettingStarted
     [Fact]
     public void HelloWorldTest()
     {
-        true.Should().Be(true);
+        true.ShouldBe(true);
     }
 
     [Fact]
@@ -22,7 +22,7 @@ public class GettingStarted
 
         // Assert
         //Assert.Equal(expected, actual);
-        actual.Should().Be(expected);
+        actual.ShouldBe(expected);
 
     }
 }
